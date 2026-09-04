@@ -2,6 +2,7 @@ from .serializer import  TaskSerializer
 from .models import Task
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
+from django.http import JsonResponse
 
 class TaskViewSet(viewsets.ModelViewSet):
     serializer_class = TaskSerializer
@@ -16,3 +17,6 @@ class TaskViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         return serializer.save(owner=self.request.user)
+
+def health_check(request):
+    return JsonResponse({"status":"ok"})
