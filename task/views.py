@@ -1,8 +1,11 @@
-from .serializer import  TaskSerializer
+from .serializer import  TaskSerializer, RegisterSerializer
 from .models import Task
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.http import JsonResponse
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.views import APIView
 
 class TaskViewSet(viewsets.ModelViewSet):
     serializer_class = TaskSerializer
@@ -20,3 +23,22 @@ class TaskViewSet(viewsets.ModelViewSet):
 
 def health_check(request):
     return JsonResponse({"status":"ok"})
+
+class RegisterView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                  "message": "User created successfully"
+            },
+            status=status.HTTP_201_CREATED)
+        else:
+            return Response({
+                              "message": "User created unsuccessfully",
+                              "errors":serializer.errors
+                        }, 
+                        status=status.HTTP_400_BAD_REQUEST
+                        )
+          
