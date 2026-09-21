@@ -1,0 +1,33 @@
+on: push
+
+jobs:  
+  ci:  
+    runs-on: ubuntu-latest
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/taskdb
+
+    services:
+      postgres:
+        image: postgres:17    
+        env:
+          POSTGRES_DB: taskdb
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          --health-cmd pg_isready
+
+    steps:
+       - uses:  actions/checkout@v4
+       - uses: actions/setup-python@v5
+         with: 
+            python-version: "3.14.6"
+       - run: pip install -r requirements.txt          
+       - run: pytest
+
+       
