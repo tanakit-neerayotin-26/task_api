@@ -3,24 +3,7 @@ on: push
 jobs:  
   ci:  
     runs-on: ubuntu-latest
-
-    env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/taskdb
-
-    services:
-      postgres:
-        image: postgres:17    
-        env:
-          POSTGRES_DB: taskdb
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        ports:
-          - 5432:5432
-        options: >-
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-          --health-cmd pg_isready
+  
     permissions:
       contents: read
       packages: write
@@ -31,10 +14,46 @@ jobs:
          with: 
             python-version: "3.14.6"
        - run: pip install -r requirements.txt          
-       - run: pytest
 
-       #===== Docker
-       - run: docker build -t task_api .
+        #===== Container Test ======
+       - name: Build  Docker image
+         run: docker build -t task_api .
+
+       - name: Create Docker network
+         run: docker network create ci-network
+      
+       - name: PostreSQL container   
+         run: |
+            docker run -d \
+            --name postgres \
+            --network ci-network \
+            -e POSTGRES_DB=taskdb \
+            -e POSTGRES_PASSWORD=postgres \
+            -e POSTGRES_USER=postgres \
+             postgres:17
+
+       - name: Wait for PostgreSQL
+         run: |
+            until docker exec postgres pg_isready -U postgres -d taskdb; do
+              sleep 2
+            done
+
+       - name: Start Django
+         run: |
+            docker run -d \
+            --name django \
+            --network ci-network \
+            -p 8000:8000 \
+            -e DATABASE_URL=postgresql://postgres:postgres@postgres:5432/taskdb \
+            task_api
+
+       - name: Wait for Django
+         run: |
+            until curl --output /dev/null --silent --head http://127.0.0.1:8000/; do
+             sleep 2
+             done
+       
+       - run: pytest
 
        - name: Login to GHCR
          uses: docker/login-action@v3
