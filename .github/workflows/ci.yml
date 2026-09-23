@@ -57,6 +57,10 @@ jobs:
 
        - run: pytest
 
+       - name: Show django logs
+         if: always()
+         run: docker logs django
+
        - name: Login to GHCR
          uses: docker/login-action@v3
          with:
