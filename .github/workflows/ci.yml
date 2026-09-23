@@ -53,12 +53,48 @@ jobs:
             until curl --output /dev/null --silent --head http://127.0.0.1:8000/; do
              sleep 2
              done
+             
        - name: Run migration
          run: docker exec django python manage.py migrate --noinput
+
+       - name: Create test user and token
+         run: |
+          python - <<'PY'
+          import requests
+          import os
+
+          base_url = "http://127.0.0.1:8000"
+          password = "ci-test-password"
+
+          #Register B
+          response = requests.post(
+          f"{base_url}/api/register/",
+          json={
+            "username":"user_b",
+            "password": password
+            }
+          )
+          print("Register status:", response.status_code)
+          response.raise_for_status()
+          
+          # Get token B 
+          response = requests.post(
+          f"{base_url}/api/token/",
+          json={
+            "username":"user_b",
+            "password": password
+            }
+          )       
+          print("Token status:", response.status_code)
+          response.raise_for_status()
+          token = response.json()["token"]
+          # ส่ง token ให้ steps ถัดไป
+          with open(os.environ["GITHUB_ENV"], "a") as env:
+            env.write(f"USER_B_TOKEN={token}\n")
          
        - name: Run pytest
          env:
-            USER_B_TOKEN: ${{ secrets.USER_B_TOKEN }}   
+          PASS_A: ci-test-password
          run: pytest
 
        - name: Show django logs
