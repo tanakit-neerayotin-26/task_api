@@ -45,6 +45,7 @@ jobs:
             --network ci-network \
             -p 8000:8000 \
             -e DATABASE_URL=postgresql://postgres:postgres@postgres:5432/taskdb \
+            -e SECRET_KEY="${{ secrets.SECRET_KEY }}" \
             task_api
 
        - name: Wait for Django
