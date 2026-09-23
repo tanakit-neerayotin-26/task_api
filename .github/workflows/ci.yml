@@ -52,7 +52,9 @@ jobs:
             until curl --output /dev/null --silent --head http://127.0.0.1:8000/; do
              sleep 2
              done
-       
+       - name: Run migration
+         run: docker exec django python manage.py migrate --noinput
+
        - run: pytest
 
        - name: Login to GHCR
