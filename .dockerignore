@@ -4,8 +4,8 @@ venv_linux/
 __pycache__/
 .pytest_cache/
 *.pyc
+.git/
 db.sqlite3
-data.json
-patch.json
+.github/
 auth.txt
 comment.txt
