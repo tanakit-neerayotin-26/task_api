@@ -55,8 +55,11 @@ jobs:
              done
        - name: Run migration
          run: docker exec django python manage.py migrate --noinput
-
-       - run: pytest
+         
+       - name: Run pytest
+         env:
+            USER_B_TOKEN: ${{ secrets.USER_B_TOKEN }}   
+         run: pytest
 
        - name: Show django logs
          if: always()
