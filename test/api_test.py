@@ -14,7 +14,7 @@ def test_status():
 #=================
 #Task GET
 #================
-def test_api_http_get_token_check_all(headers, base_url):
+def test_api_http_get_token_check_all(headers, base_url, task):
     response = requests.get(base_url + "/api/task/", headers=headers)
     data = response.json()
     required_keys = ["id", 
