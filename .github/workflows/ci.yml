@@ -114,6 +114,11 @@ jobs:
        - name: Push image
          run: docker push ghcr.io/${{ github.repository }}:latest
 
+       - name: Redeploy Railway
+         run: npx -y @railway/cli@latest redeploy --service 6e75a5dc-121f-474a-a06f-86aeb161727c --yes
+         env:
+            RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
 
       
 
